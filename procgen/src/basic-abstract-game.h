@@ -79,6 +79,7 @@ class BasicAbstractGame : public Game {
     int get_obj_from_floats(float i, float j);
     int get_agent_index();
     std::vector<int> get_cells_with_type(int type);
+    Grid<int> get_grid();
 
     void check_grid_collisions(const std::shared_ptr<Entity> &src);
     float get_distance(const std::shared_ptr<Entity> &p0, const std::shared_ptr<Entity> &p1);
@@ -120,7 +121,7 @@ class BasicAbstractGame : public Game {
 
     std::vector<float> asset_aspect_ratios;
     std::vector<int> asset_num_themes;
-    
+
     bool use_procgen_background = false;
     int background_index = 0;
     float bg_tile_ratio = 0.0f;

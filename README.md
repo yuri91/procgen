@@ -1,3 +1,5 @@
+This is a fork of openai/procgen that aims to expose the ground truth latent state of environments through the `info` variable passed into python. The original procgen readme is below.
+
 **Status:** Maintenance (expect bug fixes and minor updates)
 
 # Procgen Benchmark

@@ -6,7 +6,7 @@
 const std::string NAME = "miner";
 
 const float COMPLETION_BONUS = 10.0;
-const int DIAMOND_REWARD = 1.0;
+const float DIAMOND_REWARD = 1.0;
 
 const int BOULDER = 1;
 const int DIAMOND = 2;
@@ -270,11 +270,10 @@ class MinerGame : public BasicAbstractGame {
 
         for (int idx = 0; idx < main_area; idx++) {
             int obj = get_obj(idx);
-
             int obj_x = idx % main_width;
-            int agent_idx = (agent->y - .5) * main_width + (agent->x - .5);
-
             int stat_type = get_stationary_type(obj);
+
+            int agent_idx = get_agent_index();
 
             if (stat_type == DIAMOND) {
                 diamonds_count++;
@@ -282,18 +281,18 @@ class MinerGame : public BasicAbstractGame {
 
             if (obj == BOULDER || obj == MOVING_BOULDER || obj == DIAMOND || obj == MOVING_DIAMOND) {
                 int below_idx = idx - main_width;
-                int obj2 = get_obj(below_idx);
+                int below_object = get_obj(below_idx);
                 bool agent_is_below = agent_idx == below_idx;
 
-                if (obj2 == SPACE && !agent_is_below) {
+                if (below_object == SPACE && !agent_is_below) {
                     set_obj(idx, SPACE);
                     set_obj(below_idx, get_moving_type(obj));
                 } else if (agent_is_below && is_moving(obj)) {
                     step_data.done = true;
-                } else if (is_round(obj2) && obj_x > 0 && is_free(idx - 1) && is_free(idx - main_width - 1)) {
+                } else if (is_round(below_object) && obj_x > 0 && is_free(idx - 1) && is_free(idx - main_width - 1)) {
                     set_obj(idx, SPACE);
-                    set_obj(idx - 1, get_stationary_type(obj));
-                } else if (is_round(obj2) && obj_x < main_width - 1 && is_free(idx + 1) && is_free(idx - main_width + 1)) {
+                    set_obj(idx - 1, stat_type);
+                } else if (is_round(below_object) && obj_x < main_width - 1 && is_free(idx + 1) && is_free(idx - main_width + 1)) {
                     set_obj(idx, SPACE);
                     set_obj(idx + 1, stat_type);
                 } else {
@@ -321,6 +320,69 @@ class MinerGame : public BasicAbstractGame {
     void deserialize(ReadBuffer *b) override {
         BasicAbstractGame::deserialize(b);
         diamonds_remaining = b->read_int();
+    }
+
+    struct MinerState {
+        int grid_width;
+        int grid_height;
+        std::vector<int> grid;
+        std::map<int, std::string> grid_item_names;
+        int agent_x;
+        int agent_y;
+        int exit_x;
+        int exit_y;
+    };
+
+    MinerState
+    get_latent_state() {
+        MinerState state;
+
+        Grid<int> grid = get_grid();
+
+        state.grid_width = grid.w;
+        state.grid_height = grid.h;
+        state.grid = grid.data;
+        state.grid_item_names = {
+            {1, "boulder"},
+            {2, "diamond"},
+            {3, "moving_boulder"},
+            {4, "moving_diamond"},
+            {5, "enemy"},
+            {6, "exit"},
+            {9, "agent"},
+            {10, "oob_wall"},
+        };
+        state.agent_x = int(agent->x);
+        state.agent_y = int(agent->y);
+
+        std::shared_ptr<Entity> exit_entity = *std::find_if(entities.begin(), entities.end(), [](std::shared_ptr<Entity> e) { return e->type == EXIT; });
+
+        state.exit_x = int(exit_entity->x);
+        state.exit_y = int(exit_entity->y);
+
+        return state;
+    }
+
+    void observe() override {
+        Game::observe();
+
+        auto latent_state = get_latent_state();
+
+        int32_t *grid_size = (int32_t *)(info_bufs[info_name_to_offset.at("grid_size")]);
+
+        grid_size[0] = latent_state.grid_width;
+        grid_size[1] = latent_state.grid_height;
+
+        int32_t *grid = (int32_t *)(info_bufs[info_name_to_offset.at("grid")]);
+        std::copy(latent_state.grid.begin(), latent_state.grid.end(), grid);
+
+        int32_t *agent_pos = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
+        agent_pos[0] = latent_state.agent_x;
+        agent_pos[1] = latent_state.agent_y;
+
+        int32_t *exit_pos = (int32_t *)(info_bufs[info_name_to_offset.at("exit_pos")]);
+        exit_pos[0] = latent_state.exit_x;
+        exit_pos[1] = latent_state.exit_y;
     }
 };
 

@@ -1,14 +1,14 @@
-import threading
-import os
 import contextlib
-import subprocess as sp
-import shutil
 import json
-import sys
-import platform
 import multiprocessing as mp
+import os
+import platform
+import shutil
+import subprocess as sp
+import sys
+import threading
 
-import gym3
+import gym3  # type: ignore
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -57,9 +57,7 @@ def _attempt_configure(build_type, package):
         cmake_prefix_paths = ["/usr/local/opt/qt5/lib/cmake"]
         conda_exe = shutil.which("conda")
         if conda_exe is not None:
-            conda_info = json.loads(
-                sp.run(["conda", "info", "--json"], stdout=sp.PIPE).stdout
-            )
+            conda_info = json.loads(sp.run(["conda", "info", "--json"], stdout=sp.PIPE).stdout)
             conda_prefix = conda_info["active_prefix"]
             if conda_prefix is None:
                 conda_prefix = conda_info["conda_prefix"]
@@ -111,7 +109,7 @@ def build(package=False, debug=False):
                 lock_ctx = nullcontext()
             else:
                 # prevent multiple processes from trying to build at the same time
-                import filelock
+                import filelock  # type: ignore
 
                 lock_ctx = filelock.FileLock(".build-lock")
             with lock_ctx:

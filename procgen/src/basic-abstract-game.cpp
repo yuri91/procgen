@@ -214,6 +214,10 @@ std::vector<int> BasicAbstractGame::get_cells_with_type(int type) {
     return cells;
 }
 
+Grid<int> BasicAbstractGame::get_grid() {
+    return Grid<int>(grid);
+}
+
 void BasicAbstractGame::set_obj(int idx, int elem) {
     grid.set_index(idx, elem);
 }
@@ -448,7 +452,8 @@ bool BasicAbstractGame::should_preserve_type_themes(int type) {
 }
 
 int BasicAbstractGame::mask_theme_if_necessary(int theme, int type) {
-    if (options.restrict_themes && !should_preserve_type_themes(type)) return 0;
+    if (options.restrict_themes && !should_preserve_type_themes(type))
+        return 0;
     return theme;
 }
 
@@ -1174,13 +1179,6 @@ void BasicAbstractGame::serialize(WriteBuffer *b) {
     write_entities(b, entities);
 
     fassert(!options.use_generated_assets);
-    // these will be cleared and re-generated instead of being saved
-//     std::vector<std::shared_ptr<QImage>> basic_assets;
-//     std::vector<std::shared_ptr<QImage>> basic_reflections;
-//     std::vector<std::shared_ptr<QImage>> *main_bg_images_ptr;
-
-    // std::vector<float> asset_aspect_ratios;
-    // std::vector<int> asset_num_themes;
 
     b->write_int(use_procgen_background);
     b->write_int(background_index);
@@ -1236,16 +1234,6 @@ void BasicAbstractGame::deserialize(ReadBuffer *b) {
     // we don't want to serialize a bunch of QImages
     // for now we only support games that don't require storing these assets
     fassert(!options.use_generated_assets);
-
-    // when restoring state (to the same game type) with generated assets disabled, these data structures contain cached
-    // asset data, and missing data will be filled in the same way in all environments
-//     std::vector<std::shared_ptr<QImage>> basic_assets;
-//     std::vector<std::shared_ptr<QImage>> basic_reflections;
-    // main_bg_images_ptr is set in game_init for all supported games, so it should always be the same
-//     std::vector<std::shared_ptr<QImage>> *main_bg_images_ptr;
-
-    // std::vector<float> asset_aspect_ratios;
-    // std::vector<int> asset_num_themes;
 
     use_procgen_background = b->read_int();
     background_index = b->read_int();
