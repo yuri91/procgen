@@ -2,7 +2,7 @@
 #include "../assetgen.h"
 #include <set>
 #include <queue>
-
+#include <iterator>
 const std::string NAME = "miner";
 
 const float COMPLETION_BONUS = 10.0;
@@ -20,7 +20,7 @@ const int OOB_WALL = 10;
 
 class MinerGame : public BasicAbstractGame {
   public:
-    int diamonds_remaining = 0;
+    int diamonds_remaining = -1;
 
     MinerGame()
         : BasicAbstractGame(NAME) {
@@ -349,7 +349,7 @@ class MinerGame : public BasicAbstractGame {
             {4, "moving_diamond"},
             {5, "enemy"},
             {6, "exit"},
-            {9, "agent"},
+            {9, "dirt"},
             {10, "oob_wall"},
         };
         state.agent_x = int(agent->x);
@@ -374,7 +374,17 @@ class MinerGame : public BasicAbstractGame {
         grid_size[1] = latent_state.grid_height;
 
         int32_t *grid = (int32_t *)(info_bufs[info_name_to_offset.at("grid")]);
-        std::copy(latent_state.grid.begin(), latent_state.grid.end(), grid);
+        for (int y = 0; y < latent_state.grid_height; y++) {
+            auto start = latent_state.grid.begin();
+            std::advance(start, y * latent_state.grid_width);
+
+            auto stop = latent_state.grid.begin();
+            std::advance(stop, (y + 1) * latent_state.grid_width);
+
+            int32_t *grid_insert = grid + (y * 35);
+
+            std::copy(start, stop, grid_insert);
+        }
 
         int32_t *agent_pos = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
         agent_pos[0] = latent_state.agent_x;
