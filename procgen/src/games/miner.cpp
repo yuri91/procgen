@@ -326,7 +326,6 @@ class MinerGame : public BasicAbstractGame {
         int grid_width;
         int grid_height;
         std::vector<int> grid;
-        std::map<int, std::string> grid_item_names;
         int agent_x;
         int agent_y;
         int exit_x;
@@ -342,16 +341,6 @@ class MinerGame : public BasicAbstractGame {
         state.grid_width = grid.w;
         state.grid_height = grid.h;
         state.grid = grid.data;
-        state.grid_item_names = {
-            {1, "boulder"},
-            {2, "diamond"},
-            {3, "moving_boulder"},
-            {4, "moving_diamond"},
-            {5, "enemy"},
-            {6, "exit"},
-            {9, "dirt"},
-            {10, "oob_wall"},
-        };
         state.agent_x = int(agent->x);
         state.agent_y = int(agent->y);
 
@@ -374,17 +363,10 @@ class MinerGame : public BasicAbstractGame {
         grid_size[1] = latent_state.grid_height;
 
         int32_t *grid = (int32_t *)(info_bufs[info_name_to_offset.at("grid")]);
-        for (int y = 0; y < latent_state.grid_height; y++) {
-            auto start = latent_state.grid.begin();
-            std::advance(start, y * latent_state.grid_width);
-
-            auto stop = latent_state.grid.begin();
-            std::advance(stop, (y + 1) * latent_state.grid_width);
-
-            int32_t *grid_insert = grid + (y * 35);
-
-            std::copy(start, stop, grid_insert);
-        }
+        auto grid_start = latent_state.grid.begin();
+        auto grid_stop = latent_state.grid.begin();
+        std::advance(grid_stop, latent_state.grid_width * latent_state.grid_height);
+        std::copy(grid_start, grid_stop, grid);
 
         int32_t *agent_pos = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
         agent_pos[0] = latent_state.agent_x;

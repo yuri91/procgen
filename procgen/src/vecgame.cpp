@@ -284,9 +284,8 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         strcpy(s.name, "grid");
         s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
         s.dtype = LIBENV_DTYPE_INT32;
-        s.shape[0] = 35;
-        s.shape[1] = 35;
-        s.ndim = 2,
+        s.shape[0] = 35 * 35;
+        s.ndim = 1,
         s.low.int32 = 0;
         s.high.int32 = INT32_MAX;
         info_types.push_back(s);

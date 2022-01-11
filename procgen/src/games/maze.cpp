@@ -7,6 +7,10 @@ const float REWARD = 10.0;
 
 const int GOAL = 2;
 
+const int EASY_GRID_SIZE = 15;
+const int HARD_GRID_SIZE = 25;
+const int MEMORY_GRID_SIZE = 31;
+
 class MazeGame : public BasicAbstractGame {
   public:
     std::shared_ptr<MazeGen> maze_gen;
@@ -41,11 +45,11 @@ class MazeGame : public BasicAbstractGame {
         int dist_diff = options.distribution_mode;
 
         if (dist_diff == EasyMode) {
-            world_dim = 15;
+            world_dim = EASY_GRID_SIZE;
         } else if (dist_diff == HardMode) {
-            world_dim = 25;
+            world_dim = HARD_GRID_SIZE;
         } else if (dist_diff == MemoryMode) {
-            world_dim = 31;
+            world_dim = MEMORY_GRID_SIZE;
         }
 
         main_width = world_dim;
@@ -73,10 +77,12 @@ class MazeGame : public BasicAbstractGame {
         maze_gen->generate_maze();
         maze_gen->place_objects(GOAL, 1);
 
+        // Fill top row with walls
         for (int i = 0; i < grid_size; i++) {
             set_obj(i, WALL_OBJ);
         }
 
+        // Move maze_gen grid to grid with offset
         for (int i = 0; i < maze_dim; i++) {
             for (int j = 0; j < maze_dim; j++) {
                 int type = maze_gen->grid.get(i + MAZE_OFFSET, j + MAZE_OFFSET);
@@ -85,6 +91,7 @@ class MazeGame : public BasicAbstractGame {
             }
         }
 
+        // Fill other rows with walls
         if (margin > 0) {
             for (int i = 0; i < maze_dim + 2; i++) {
                 set_obj(margin - 1, margin + i - 1, WALL_OBJ);
@@ -132,6 +139,50 @@ class MazeGame : public BasicAbstractGame {
         BasicAbstractGame::deserialize(b);
         maze_dim = b->read_int();
         world_dim = b->read_int();
+    }
+
+    struct MazeState {
+        int grid_width;
+        int grid_height;
+        std::vector<int> grid;
+        int agent_x;
+        int agent_y;
+    };
+
+    MazeState
+    get_latent_state() {
+        MazeState state;
+        Grid<int> grid = get_grid();
+
+        state.grid_width = grid.w;
+        state.grid_height = grid.h;
+        state.grid = grid.data;
+
+        state.agent_x = agent->x;
+        state.agent_y = agent->y;
+
+        return state;
+    }
+
+    void observe() override {
+        Game::observe();
+
+        auto latent_state = get_latent_state();
+
+        int32_t *grid_size = (int32_t *)(info_bufs[info_name_to_offset.at("grid_size")]);
+
+        grid_size[0] = latent_state.grid_width;
+        grid_size[1] = latent_state.grid_height;
+
+        int32_t *grid = (int32_t *)(info_bufs[info_name_to_offset.at("grid")]);
+        auto grid_start = latent_state.grid.begin();
+        auto grid_stop = latent_state.grid.begin();
+        std::advance(grid_stop, latent_state.grid_width * latent_state.grid_height);
+        std::copy(grid_start, grid_stop, grid);
+
+        int32_t *agent_pos = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
+        agent_pos[0] = latent_state.agent_x;
+        agent_pos[1] = latent_state.agent_y;
     }
 };
 
