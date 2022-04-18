@@ -37,7 +37,7 @@ if (APPLE OR UNIX)
 endif()
 
 # include qt5
-find_package(Qt5 COMPONENTS Gui REQUIRED)
+#find_package(Qt5 COMPONENTS Gui REQUIRED)
 
 add_library(env
   SHARED
@@ -75,4 +75,6 @@ add_library(env
 # find libenv.h header
 target_include_directories(env PUBLIC ${LIBENV_DIR})
 
-target_link_libraries(env Qt5::Gui)
+target_include_directories(env PUBLIC "Qt")
+
+#target_link_libraries(env Qt5::Gui)
