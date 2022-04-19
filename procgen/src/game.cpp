@@ -156,11 +156,18 @@ void Game::step() {
 void Game::observe() {
     render_to_canvas(canvas, RENDER_RES, RENDER_RES, false);
     //bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
-    *reward_ptr = step_data.reward;
-    *first_ptr = (uint8_t)step_data.done;
-    *(int32_t *)(info_bufs[info_name_to_offset.at("prev_level_seed")]) = (int32_t)(prev_level_seed);
-    *(uint8_t *)(info_bufs[info_name_to_offset.at("prev_level_complete")]) = (uint8_t)(step_data.level_complete);
-    *(int32_t *)(info_bufs[info_name_to_offset.at("level_seed")]) = (int32_t)(current_level_seed);
+    state->set_reward(step_data.reward);
+    auto* info = new client::Info();
+    info->set_prev_level_seed(prev_level_seed);
+    info->set_prev_level_complete(step_data.level_complete);
+    info->set_level_seed(current_level_seed);
+    state->set_info(info);
+    state->set_done(step_data.done);
+    //*reward_ptr = step_data.reward;
+    //*first_ptr = (uint8_t)step_data.done;
+    //*(int32_t *)(info_bufs[info_name_to_offset.at("prev_level_seed")]) = (int32_t)(prev_level_seed);
+    //*(uint8_t *)(info_bufs[info_name_to_offset.at("prev_level_complete")]) = (uint8_t)(step_data.level_complete);
+    //*(int32_t *)(info_bufs[info_name_to_offset.at("level_seed")]) = (int32_t)(current_level_seed);
 }
 
 void Game::game_init() {

@@ -2,6 +2,7 @@
 #include "game-registry.h"
 #include "game.h"
 #include "resources.h"
+#include "state.h"
 
 namespace client {
 	class CheerpGameOpts: public Object {
@@ -21,16 +22,16 @@ public:
 		delete game;
 		game = nullptr;
 	}
-	static client::Promise* init(client::String* name, client::CheerpGameOpts* opts)
+	static client::Promise* init(client::String* name, client::CheerpGameOpts* opts, client::GameState* state)
 	{
 		auto* p = images_load();
-		return p->then(cheerp::Callback([name, opts](){
-			return new CheerpGame(name, opts);
+		return p->then(cheerp::Callback([name, opts, state](){
+			return new CheerpGame(name, opts, state);
 		}));
 	}
 
 private:
-	CheerpGame(client::String* jsname, client::CheerpGameOpts* opts)
+	CheerpGame(client::String* jsname, client::CheerpGameOpts* opts, client::GameState* state)
 	{
 		std::string name(*jsname);
 		game = globalGameRegistry->at(name)();
@@ -43,6 +44,7 @@ private:
 		game->set_canvas(canvas);
 		div->appendChild(canvas);
 
+		game->state = state;
 		game->level_seed_rand_gen.seed(opts->get_seed());
 		game->options.use_generated_assets = false;
 		game->game_init();

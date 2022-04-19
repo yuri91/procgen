@@ -18,6 +18,7 @@ Base class used for all games, all games must inherit from this
 #include "object-ids.h"
 #include "game-registry.h"
 #include "buffer.h"
+#include "state.h"
 
 // We want all games to have same observation space. So all these
 // constants here related to observation space are constants forever.
@@ -101,11 +102,12 @@ class Game {
     bool is_waiting_for_step = false;
 
     // pointers to buffers
-    int32_t *action_ptr;
-    std::vector<void *> obs_bufs;
-    std::vector<void *> info_bufs;
-    float *reward_ptr = nullptr;
-    uint8_t *first_ptr = nullptr;
+    //int32_t *action_ptr;
+    //std::vector<void *> obs_bufs;
+    //std::vector<void *> info_bufs;
+    //float *reward_ptr = nullptr;
+    //uint8_t *first_ptr = nullptr;
+    client::GameState* state;
 
     Game(std::string name);
     void step();
