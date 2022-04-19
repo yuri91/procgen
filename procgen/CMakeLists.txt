@@ -39,8 +39,7 @@ endif()
 # include qt5
 #find_package(Qt5 COMPONENTS Gui REQUIRED)
 
-add_library(env
-  SHARED
+add_executable(env
   src/assetgen.cpp
   src/basic-abstract-game.cpp
   src/cpp-utils.cpp
@@ -68,8 +67,9 @@ add_library(env
   src/randgen.cpp
   src/roomgen.cpp
   src/resources.cpp
-  src/vecgame.cpp
-  src/vecoptions.cpp
+  src/cheerpgame.cpp
+  #  src/vecgame.cpp
+  #src/vecoptions.cpp
 )
 
 # find libenv.h header

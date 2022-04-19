@@ -26,10 +26,11 @@ struct ReadBuffer {
     };
 
     int read_int() {
-        fassert(offset + sizeof(int) <= length);
-        auto d = (int*)(&data[offset]);
-        offset += sizeof(int);
-        return *d;
+        //fassert(offset + sizeof(int) <= length);
+        //auto d = (int*)(&data[offset]);
+        //offset += sizeof(int);
+        //return *d;
+        return 0;
     };
 
     std::vector<int> read_vector_int() {
@@ -42,10 +43,11 @@ struct ReadBuffer {
     };
 
     float read_float() {
-        fassert(offset + sizeof(float) <= length);
-        auto d = (float*)(&data[offset]);
-        offset += sizeof(float);
-        return *d;
+        //fassert(offset + sizeof(float) <= length);
+        //auto d = (float*)(&data[offset]);
+        //offset += sizeof(float);
+        //return *d;
+        return 0;
     };
 
     std::vector<float> read_vector_float() {
@@ -91,10 +93,10 @@ struct WriteBuffer {
     };
 
     void write_int(int i) {
-        fassert(offset + sizeof(int) <= length);
-        auto d = (int*)(&data[offset]);
-        *d = i;
-        offset += sizeof(int);
+        //fassert(offset + sizeof(int) <= length);
+        //auto d = (int*)(&data[offset]);
+        //*d = i;
+        //offset += sizeof(int);
     };
 
 
@@ -106,10 +108,10 @@ struct WriteBuffer {
     };
 
     void write_float(float f) {
-        fassert(offset + sizeof(float) <= length);
-        auto d = (float*)(&data[offset]);
-        *d = f;
-        offset += sizeof(float);
+        //fassert(offset + sizeof(float) <= length);
+        //auto d = (float*)(&data[offset]);
+        //*d = f;
+        //offset += sizeof(float);
     };
 
     void write_vector_float(const std::vector<float>& v) {

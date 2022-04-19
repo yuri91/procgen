@@ -609,6 +609,7 @@ public:
     Q_DECL_CONSTEXPR QRectF() noexcept : xp(0.), yp(0.), w(0.), h(0.) {}
     Q_DECL_CONSTEXPR QRectF(const QPointF &topleft, const QPointF &bottomRight) noexcept;
     Q_DECL_CONSTEXPR QRectF(qreal left, qreal top, qreal width, qreal height) noexcept;
+    Q_DECL_CONSTEXPR QRectF(const QRect &r) noexcept;
 
     Q_DECL_CONSTEXPR inline bool isNull() const noexcept;
     Q_DECL_CONSTEXPR inline bool isEmpty() const noexcept;
@@ -709,6 +710,11 @@ Q_DECL_CONSTEXPR inline QRectF::QRectF(qreal aleft, qreal atop, qreal awidth, qr
 
 Q_DECL_CONSTEXPR inline QRectF::QRectF(const QPointF &atopLeft, const QPointF &abottomRight) noexcept
     : xp(atopLeft.x()), yp(atopLeft.y()), w(abottomRight.x() - atopLeft.x()), h(abottomRight.y() - atopLeft.y())
+{
+}
+
+Q_DECL_CONSTEXPR inline QRectF::QRectF(const QRect &r) noexcept
+    : xp(r.x()), yp(r.y()), w(r.width()), h(r.height())
 {
 }
 

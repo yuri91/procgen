@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cheerp/client.h>
 #include "../QRect"
 #include "../QRectF"
 #include "../QImage"
@@ -19,14 +20,25 @@ private:
 	QColor c;
 };
 
+namespace Qt {
+	enum PenStyle {
+        NoPen,
+		SolidLine,
+	};
+}
+
 class QPen {
 public:
+	QPen(const Qt::PenStyle s) noexcept:
+		c(QColor(0,0,0)), w(1), s(s)
+	{
+	}
 	QPen(const QColor& c) noexcept:
-		c(c), w(1)
+		c(c), w(1), s(Qt::PenStyle::SolidLine)
 	{
 	}
 	QPen(const QBrush& b, qreal w) noexcept:
-		c(b.color()), w(w)
+		c(b.color()), w(w), s(Qt::PenStyle::SolidLine)
 	{
 	}
 	const QColor& color() const
@@ -37,16 +49,14 @@ public:
 	{
 		return w;
 	}
+	Qt::PenStyle style() const {
+		return s;
+	}
 private:
 	QColor c;
 	qreal w;
+	Qt::PenStyle s;
 };
-
-namespace Qt {
-	enum PenStyle {
-        NoPen,
-	};
-}
 
 
 class QPainter {
@@ -58,22 +68,76 @@ public:
     enum CompositionMode {
         CompositionMode_Source,
 	};
-    explicit QPainter(QImage *);
-    void setPen(const QPen &pen);
-    void setPen(Qt::PenStyle style);
-    void drawEllipse(const QRect &r);
-    void drawEllipse(const QRectF &r);
-    void drawLine(int x1, int y1, int x2, int y2);
-    void drawImage(const QRectF &r, const QImage &image);
-	void restore();
-	void save();
+    explicit QPainter(client::HTMLCanvasElement *canvas)
+		: canvas(canvas), ctx(static_cast<client::CanvasRenderingContext2D*>(canvas->getContext("2d")))
+	{
+		setPen(QPen(QColor(0,0,0)));
+		setBrush(QBrush(QColor(0,0,0)));
+	};
+    explicit QPainter(QImage *img): QPainter(img->getCanvas()) {
+	}
+    void setPen(const QPen &pen) {
+		ctx->set_strokeStyle(pen.color().toString().c_str());
+	}
+    void setPen(Qt::PenStyle style) {
+		setPen(QPen(style));
+	}
+    void drawEllipse(const QRect &r) {
+		drawEllipse(r);
+	}
+    void drawEllipse(const QRectF &r) {
+		ctx->beginPath();
+		QPointF c = r.center();
+		ctx->ellipse(c.x(), c.y(), r.width()/2, r.height()/2, 0, 0, 2*client::Math.get_PI());
+		ctx->stroke();
+	}
+    void drawLine(int x1, int y1, int x2, int y2) {
+		ctx->beginPath();
+		ctx->moveTo(x1, y1);
+		ctx->lineTo(x2, y2);
+		ctx->stroke();
+	}
+    void drawImage(const QRectF &r, const QImage &image) {
+		ctx->drawImage(image.getCanvas(), 0, 0, image.width(), image.height(), r.x(), r.y(), r.width(), r.height());
+	}
+	void restore() {
+		ctx->restore();
+	}
+	void save() {
+		ctx->save();
+	}
     void setRenderHint(RenderHint hint, bool on = true);
-	void setBrush(const QBrush &brush);
-    void fillRect(const QRectF &, const QColor &color);
-    void fillRect(const QRect &, const QColor &color);
-    void setOpacity(qreal opacity);
-    void translate(qreal dx, qreal dy);
-    void rotate(qreal a);
-    void setCompositionMode(CompositionMode mode);
+	void setBrush(const QBrush &brush) {
+		ctx->set_fillStyle(brush.color().toString().c_str());
+	}
+    void fillRect(const QRectF &r, const QColor &color)
+	{
+		ctx->set_fillStyle(color.toString().c_str());
+		ctx->fillRect(r.x(), r.y(), r.width(), r.height());
+	}
+    void fillRect(const QRect &r, const QColor &color)
+	{
+		fillRect(r, color);
+	}
+    void setOpacity(qreal opacity) {
+		ctx->set_globalAlpha(opacity);
+	}
+    void translate(qreal dx, qreal dy) {
+		ctx->translate(dx, dy);
+	}
+    void rotate(qreal a) {
+		ctx->rotate(a);
+	}
+    void setCompositionMode(CompositionMode mode) {
+		switch (mode) {
+			case CompositionMode::CompositionMode_Source:
+			{
+				ctx->set_globalCompositeOperation("copy");
+				break;
+			}
+		}
+	}
 private:
+	client::HTMLCanvasElement* canvas;
+	client::CanvasRenderingContext2D* ctx;
 };

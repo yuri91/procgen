@@ -11,6 +11,7 @@ Base class used for all games, all games must inherit from this
 #include <functional>
 #include <vector>
 #include <string>
+#include <cheerp/client.h>
 #include "entity.h"
 #include "randgen.h"
 #include "resources.h"
@@ -92,7 +93,8 @@ class Game {
 
     int fixed_asset_seed = 0;
 
-    uint32_t render_buf[RES_W * RES_H];
+    client::HTMLCanvasElement* canvas;
+    //uint32_t render_buf[RES_W * RES_H];
 
     int cur_time = 0;
 
@@ -108,8 +110,9 @@ class Game {
     Game(std::string name);
     void step();
     void reset();
-    void render_to_buf(void *buf, int w, int h, bool antialias);
+    void render_to_canvas(client::HTMLCanvasElement* canvas, int w, int h, bool antialias);
     void parse_options(std::string name, VecOptions opt_vec);
+    void set_canvas(client::HTMLCanvasElement* canvas);
 
     virtual ~Game() = 0;
     virtual void observe();

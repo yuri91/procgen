@@ -74,12 +74,11 @@ void Game::parse_options(std::string name, VecOptions opts) {
     opts.ensure_empty();
 }
 
-void Game::render_to_buf(void *dst, int w, int h, bool antialias) {
+void Game::render_to_canvas(client::HTMLCanvasElement* canvas, int w, int h, bool antialias) {
     // Qt focuses on RGB32 performance:
     // https://doc.qt.io/qt-5/qpainter.html#performance
     // so render to an RGB32 buffer and then convert it rather than render to RGB888 directly
-    QImage img((uchar *)dst, w, h, w * 4, QImage::Format_RGB32);
-    QPainter p(&img);
+    QPainter p(canvas);
 
     if (antialias) {
         p.setRenderHint(QPainter::Antialiasing, true);
@@ -155,8 +154,8 @@ void Game::step() {
 }
 
 void Game::observe() {
-    render_to_buf(render_buf, RES_W, RES_H, false);
-    bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
+    render_to_canvas(canvas, RES_W, RES_H, false);
+    //bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
     *reward_ptr = step_data.reward;
     *first_ptr = (uint8_t)step_data.done;
     *(int32_t *)(info_bufs[info_name_to_offset.at("prev_level_seed")]) = (int32_t)(prev_level_seed);
@@ -275,4 +274,9 @@ void Game::deserialize(ReadBuffer *b) {
 
     cur_time = b->read_int();
     is_waiting_for_step = b->read_int();
+}
+
+void Game::set_canvas(client::HTMLCanvasElement* canvas)
+{
+    this->canvas = canvas;
 }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "defs.h"
+#include <string>
+#include <tuple>
 
 class Q_GUI_EXPORT QColor
 {
@@ -12,13 +14,41 @@ public:
         : r(r), g(g), b(b), a(a)
     {}
 
-    int red() const noexcept;
-    int green() const noexcept;
-    int blue() const noexcept;
+    int red() const noexcept {
+        return r;
+    }
+    int green() const noexcept {
+        return g;
+    }
+    int blue() const noexcept {
+        return b;
+    }
+    int alpha() const noexcept {
+        return a;
+    }
 
-    bool operator==(const QColor &c) const noexcept;
-    bool operator!=(const QColor &c) const noexcept;
-    void setAlpha(qreal a);
+    bool operator==(const QColor &c) const noexcept {
+        return std::tie(r,g,b,a) == std::tie(c.r,c.g,c.b,c.a);
+    }
+    bool operator!=(const QColor &c) const noexcept {
+        return ! (*this == c);
+    }
+    void setAlpha(qreal a) {
+        this->a = a;
+    }
+
+    std::string toString() const {
+        std::string ret = "rgba(";
+        ret += std::to_string(r);
+        ret += ",";
+        ret += std::to_string(g);
+        ret += ",";
+        ret += std::to_string(b);
+        ret += ",";
+        ret += std::to_string(a);
+        ret += ")";
+        return ret;
+    }
 
 private:
     uchar r;

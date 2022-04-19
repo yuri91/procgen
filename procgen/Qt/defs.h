@@ -15,5 +15,3 @@ typedef unsigned int uint;
 #include <cstring>
 #include <vector>
 #include <map>
-
-#define USHRT_MAX 65535

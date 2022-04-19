@@ -19,17 +19,17 @@ class Game;
 
 #define REGISTER_GAME(name, cls)                                         \
     static auto UNUSED_FUNCTION(_registration) = registerGame(name, [] { \
-        return std::make_shared<cls>();                                  \
+        return new cls();                                  \
     })
 
-extern std::map<std::string, std::function<std::shared_ptr<Game>()>> *globalGameRegistry;
+extern std::map<std::string, std::function<Game*()>> *globalGameRegistry;
 
 template <typename Func>
 int registerGame(std::string name, Func fn) {
     if (globalGameRegistry == nullptr) {
         // because global initialization order is undefined in C++, supposedly
         // we have to set this here
-        globalGameRegistry = new std::map<std::string, std::function<std::shared_ptr<Game>()>>();
+        globalGameRegistry = new std::map<std::string, std::function<Game*()>>();
     }
     (*globalGameRegistry)[name] = fn;
     return 0;
