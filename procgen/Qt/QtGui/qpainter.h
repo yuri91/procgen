@@ -78,6 +78,7 @@ public:
 	}
     void setPen(const QPen &pen) {
 		ctx->set_strokeStyle(pen.color().toString().c_str());
+		ctx->set_lineWidth(pen.width());
 	}
     void setPen(Qt::PenStyle style) {
 		setPen(QPen(style));

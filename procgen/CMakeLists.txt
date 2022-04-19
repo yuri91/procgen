@@ -68,6 +68,7 @@ add_executable(env
   src/roomgen.cpp
   src/resources.cpp
   src/cheerpgame.cpp
+  src/loadinghelper.cpp
   #  src/vecgame.cpp
   #src/vecoptions.cpp
 )

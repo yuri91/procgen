@@ -1,5 +1,6 @@
 #include "resources.h"
 #include "cpp-utils.h"
+#include "loadinghelper.h"
 
 std::string global_resource_root;
 
@@ -27,7 +28,16 @@ std::shared_ptr<QImage> load_resource_ptr(std::string relpath, QImage::Format fo
     return asset_ptr;
 }
 
-void images_load() {
+static client::Promise* promiseAll(client::TArray<client::Promise>* arr)
+{
+    client::Promise* ret;
+    __asm__("Promise.all(%1)" : "=r"(ret) : "r"(arr));
+    return ret;
+}
+
+client::Promise* images_load() {
+    auto* promises = new client::TArray<client::Promise>();
+
     auto sprite_paths = std::vector<std::string>{
         "kenney/Ground/Planet/planetCorner_left.png",
         "kenney/Ground/Planet/planetHill_left.png",
@@ -809,10 +819,7 @@ void images_load() {
         "platformer/playerRed_swim1.png",
         "platformer/playerGrey_duck.png",
     };
-
-    for (const auto& sprite_path : sprite_paths) {
-        sprites[sprite_path] = load_resource_ptr(sprite_path, QImage::Format_ARGB32_Premultiplied);
-    }
+    promises->push(loadingHelper.load(sprite_paths));
 
     auto group_to_vector = std::map<std::string, std::vector<std::shared_ptr<QImage>> *>{
         {"space_backgrounds", &space_backgrounds},
@@ -941,14 +948,28 @@ void images_load() {
     };
 
     for (auto const &pair : group_to_paths) {
-        auto vec = group_to_vector.at(pair.first);
-        for (const auto &path : pair.second) {
-            vec->push_back(load_resource_ptr(path, QImage::Format_RGB32));
-        }
+        promises->push(loadingHelper.load(pair.second));
     }
 
-    // also add all space backgrounds as platform backgrounds
-    for (auto bg : space_backgrounds) {
-        platform_backgrounds.push_back(bg);
-    }
+    return promiseAll(promises)->then(cheerp::Callback([
+        sprite_paths = std::move(sprite_paths),
+        group_to_paths = std::move(group_to_paths),
+        group_to_vector = std::move(group_to_vector)
+    ](){
+        for (auto const &pair : group_to_paths) {
+            auto vec = group_to_vector.at(pair.first);
+            for (const auto &path : pair.second) {
+                vec->push_back(load_resource_ptr(path, QImage::Format_RGB32));
+            }
+        }
+
+        for (const auto& sprite_path : sprite_paths) {
+            sprites[sprite_path] = load_resource_ptr(sprite_path, QImage::Format_ARGB32_Premultiplied);
+        }
+
+        // also add all space backgrounds as platform backgrounds
+        for (auto bg : space_backgrounds) {
+            platform_backgrounds.push_back(bg);
+        }
+    }));
 }

@@ -154,7 +154,7 @@ void Game::step() {
 }
 
 void Game::observe() {
-    render_to_canvas(canvas, RES_W, RES_H, false);
+    render_to_canvas(canvas, RENDER_RES, RENDER_RES, false);
     //bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
     *reward_ptr = step_data.reward;
     *first_ptr = (uint8_t)step_data.done;
