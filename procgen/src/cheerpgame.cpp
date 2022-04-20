@@ -41,6 +41,7 @@ public:
 		game->action = action;
 		game->step();
 		game->observe();
+		kb->clear();
 	}
 	void destroy()
 	{
@@ -98,7 +99,7 @@ private:
 			bool hit = true;
 			for (auto* k: combo)
 			{
-				if (!kb->isDown(k))
+				if (!kb->isPressed(k))
 				{
 					hit = false;
 					break;

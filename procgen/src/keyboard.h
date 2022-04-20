@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cheerp/client.h>
-#include <unordered_map>
+#include <unordered_set>
 #include <string>
 
 class Keyboard {
@@ -10,23 +10,22 @@ public:
 	{
 		div->set_onkeydown(cheerp::Callback([this](client::KeyboardEvent* ev)
 		{
-			state[std::string(*ev->get_code())] = true;
-		}));
-		div->set_onkeyup(cheerp::Callback([this](client::KeyboardEvent* ev)
-		{
-			state[std::string(*ev->get_code())] = false;
+			state.insert(std::string(*ev->get_code()));
 		}));
 	}
-	bool isDown(const char* key)
+	bool isPressed(const char* key)
 	{
-		return state[key];
+		return state.count(key) != 0;
+	}
+	void clear()
+	{
+		state.clear();
 	}
 	~Keyboard()
 	{
 		div->set_onkeydown(nullptr);
-		div->set_onkeyup(nullptr);
 	}
 private:
-	std::unordered_map<std::string, bool> state;
+	std::unordered_set<std::string> state;
 	client::HTMLElement* div;
 };
