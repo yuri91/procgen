@@ -2,21 +2,10 @@
 
 #include <cheerp/client.h>
 
-namespace client {
-
-class Info: public Object {
-public:
-	void set_prev_level_seed(int);
-	void set_level_seed(int);
-	void set_prev_level_complete(bool);
+struct GameState {
+	double reward;
+	int prev_level_seed;
+	int level_seed;
+	bool prev_level_complete;
+	bool done;
 };
-
-class GameState: public Object {
-public:
-	int get_action();
-	void set_action(int);
-	void set_info(Info*);
-	void set_reward(double);
-	void set_done(bool);
-};
-}

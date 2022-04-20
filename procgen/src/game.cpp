@@ -156,13 +156,11 @@ void Game::step() {
 void Game::observe() {
     render_to_canvas(canvas, RENDER_RES, RENDER_RES, false);
     //bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
-    state->set_reward(step_data.reward);
-    auto* info = new client::Info();
-    info->set_prev_level_seed(prev_level_seed);
-    info->set_prev_level_complete(step_data.level_complete);
-    info->set_level_seed(current_level_seed);
-    state->set_info(info);
-    state->set_done(step_data.done);
+    state->reward = step_data.reward;
+    state->prev_level_seed = prev_level_seed;
+    state->prev_level_complete = step_data.level_complete;
+    state->level_seed = current_level_seed;
+    state->done = step_data.done;
     //*reward_ptr = step_data.reward;
     //*first_ptr = (uint8_t)step_data.done;
     //*(int32_t *)(info_bufs[info_name_to_offset.at("prev_level_seed")]) = (int32_t)(prev_level_seed);

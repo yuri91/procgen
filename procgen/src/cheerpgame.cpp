@@ -35,13 +35,22 @@ class [[cheerp::jsexport]] CheerpGame {
 public:
 	void step()
 	{
-		int action = getAction();
-		client::console.log("step", action);
-		state->set_action(action);
-		game->action = action;
+		game->action = getAction();
 		game->step();
 		game->observe();
+		totalReward+= state.reward;
+		displayState();
 		kb->clear();
+	}
+	void displayState()
+	{
+		std::string hud = std::string("Reward: ") + std::to_string(state.reward) + "\n" +
+			"Total reward: " + std::to_string(totalReward) + "\n" +
+			"Level seed: " + std::to_string(state.level_seed) + "\n" +
+			"Previous level seed: " + std::to_string(state.prev_level_seed) + "\n" +
+			"Previous level complete: " + std::to_string(state.prev_level_complete) + "\n" +
+			"Done: " + std::to_string(state.done) + "\n";
+		stateDiv->set_innerText(hud.c_str());
 	}
 	void destroy()
 	{
@@ -50,18 +59,17 @@ public:
 		delete game;
 		game = nullptr;
 	}
-	static client::Promise* init(client::String* name, client::CheerpGameOpts* opts, client::GameState* state)
+	static client::Promise* init(client::String* name, client::CheerpGameOpts* opts)
 	{
 		auto* p = images_load();
-		return p->then(cheerp::Callback([name, opts, state](){
-			return new CheerpGame(name, opts, state);
+		return p->then(cheerp::Callback([name, opts](){
+			return new CheerpGame(name, opts);
 		}));
 	}
 
 private:
-	CheerpGame(client::String* jsname, client::CheerpGameOpts* opts, client::GameState* state)
+	CheerpGame(client::String* jsname, client::CheerpGameOpts* opts)
 	{
-		this->state = state;
 		std::string name(*jsname);
 		game = globalGameRegistry->at(name)();
 		auto* div = client::document.getElementById("app");
@@ -74,13 +82,17 @@ private:
 		game->set_canvas(canvas);
 		div->appendChild(canvas);
 
-		game->state = state;
+		game->state = &state;
 		game->level_seed_rand_gen.seed(opts->get_seed());
 		game->options.use_generated_assets = false;
 		game->game_init();
 		game->reset();
 		game->observe();
 		game->initial_reset_complete = true;
+
+		stateDiv = client::document.createElement("div");
+		div->appendChild(stateDiv);
+
 		step();
 
 		client::setInterval(cheerp::Callback([this]()
@@ -117,6 +129,8 @@ private:
 
 	Game* game;
 	Keyboard* kb;
-	client::GameState* state;
+	GameState state;
+	double totalReward{0};
+	client::HTMLElement* stateDiv;
 	client::HTMLCanvasElement* canvas;
 };

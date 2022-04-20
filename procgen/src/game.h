@@ -107,7 +107,7 @@ class Game {
     //std::vector<void *> info_bufs;
     //float *reward_ptr = nullptr;
     //uint8_t *first_ptr = nullptr;
-    client::GameState* state;
+    GameState* state;
 
     Game(std::string name);
     void step();
