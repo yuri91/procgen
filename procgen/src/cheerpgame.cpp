@@ -82,8 +82,13 @@ private:
 		game->set_canvas(canvas);
 		div->appendChild(canvas);
 
+		RandGen game_level_seed_gen;
+		game_level_seed_gen.seed(opts->get_seed());
+
 		game->state = &state;
-		game->level_seed_rand_gen.seed(opts->get_seed());
+		game->level_seed_rand_gen.seed(game_level_seed_gen.randint());
+		game->level_seed_low = 0;
+		game->level_seed_high = INT32_MAX;
 		game->options.use_generated_assets = false;
 		game->game_init();
 		game->reset();
