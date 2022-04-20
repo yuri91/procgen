@@ -14,6 +14,7 @@ public:
 class GameState: public Object {
 public:
 	int get_action();
+	void set_action(int);
 	void set_info(Info*);
 	void set_reward(double);
 	void set_done(bool);
