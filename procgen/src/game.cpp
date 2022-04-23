@@ -154,7 +154,7 @@ void Game::step() {
 }
 
 void Game::observe() {
-    render_to_canvas(canvas, RENDER_RES, RENDER_RES, false);
+    render_to_canvas(canvas, canvas->get_width(), canvas->get_height(), false);
     //bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
     state->reward = step_data.reward;
     state->prev_level_seed = prev_level_seed;

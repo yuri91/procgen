@@ -18,11 +18,12 @@
 	<div id="app"></div>
 	<script src="jsbuild/env.js"></script>
 	<script>
-		let c = CheerpGame.init("miner", {
-				seed: 0,
-		},
-		{
-			action: 0,
+		let opts = CheerpGame.defaultOpts();
+		let c = CheerpGame.init({
+			env_name: "miner",
+			rand_seed: 0,
+			distribution_mode: 1,
+			...opts
 		});
 	</script>
 	</body>

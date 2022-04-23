@@ -35,7 +35,8 @@ static client::Promise* promiseAll(client::TArray<client::Promise>* arr)
     return ret;
 }
 
-client::Promise* images_load() {
+client::Promise* images_load(const std::string& resource_root) {
+    loadingHelper.setRoot(resource_root);
     auto* promises = new client::TArray<client::Promise>();
 
     auto sprite_paths = std::vector<std::string>{

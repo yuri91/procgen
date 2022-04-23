@@ -2,8 +2,6 @@
 
 LoadingHelper loadingHelper;
 
-static constexpr const char prefix[] = "data/assets/";
-
 struct PromiseData
 {
 	client::Promise* p;
@@ -29,6 +27,11 @@ static PromiseData createPromise()
 	return PromiseData{p, rf->get_inner(), rr->get_inner()};
 }
 
+void LoadingHelper::setRoot(const std::string& root)
+{
+	this->root = root;
+}
+
 client::Promise* LoadingHelper::load(const std::vector<std::string>& images)
 {
 	int* pending = new int(images.size());
@@ -43,7 +46,7 @@ client::Promise* LoadingHelper::load(const std::vector<std::string>& images)
 	{
 		auto* img = static_cast<client::HTMLImageElement*>(client::document.createElement("img"));
 		map.emplace(s, img);
-		auto* src = new client::String(prefix);
+		auto* src = new client::String(root.c_str());
 		src = src->concat(new client::String(s.c_str()));
 		img->set_src(src);
 		img->set_onload(onLoad);

@@ -70,7 +70,7 @@ add_executable(env
   src/cheerpgame.cpp
   src/loadinghelper.cpp
   #  src/vecgame.cpp
-  #src/vecoptions.cpp
+  src/vecoptions.cpp
 )
 
 # find libenv.h header
