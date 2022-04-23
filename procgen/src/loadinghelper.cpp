@@ -45,7 +45,14 @@ client::Promise* LoadingHelper::load(const std::vector<std::string>& images)
 	for (const auto& s: images)
 	{
 		auto* img = static_cast<client::HTMLImageElement*>(client::document.createElement("img"));
-		map.emplace(s, img);
+		auto it = map.emplace(s, img);
+		if (!it.second)
+		{
+			(*pending)--;
+			if (*pending == 0)
+				reinterpret_cast<void(*)()>(pd.f)();
+			continue;
+		}
 		auto* src = new client::String(root.c_str());
 		src = src->concat(new client::String(s.c_str()));
 		img->set_src(src);
