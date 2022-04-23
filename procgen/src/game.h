@@ -94,7 +94,6 @@ class Game {
 
     int fixed_asset_seed = 0;
 
-    client::HTMLCanvasElement* canvas;
     //uint32_t render_buf[RES_W * RES_H];
 
     int cur_time = 0;
@@ -107,14 +106,13 @@ class Game {
     //std::vector<void *> info_bufs;
     //float *reward_ptr = nullptr;
     //uint8_t *first_ptr = nullptr;
-    GameState* state;
+    client::GameState* state;
 
     Game(std::string name);
     void step();
     void reset();
     void render_to_canvas(client::HTMLCanvasElement* canvas, int w, int h, bool antialias);
     void parse_options(std::string name, VecOptions opt_vec);
-    void set_canvas(client::HTMLCanvasElement* canvas);
 
     virtual ~Game() = 0;
     virtual void observe();

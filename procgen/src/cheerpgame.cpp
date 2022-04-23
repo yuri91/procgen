@@ -6,25 +6,6 @@
 #include "keyboard.h"
 #include "vecoptions.h"
 
-std::vector<std::vector<const char*>> combos =
-{
-	{"ArrowLeft", "ArrowDown"},
-	{"ArrowLeft",},
-	{"ArrowLeft", "ArrowUp"},
-	{"ArrowDown",},
-	{},
-	{"ArrowUp",},
-	{"ArrowRight", "ArrowDown"},
-	{"ArrowRight",},
-	{"ArrowRight", "ArrowUp"},
-	{"KeyD",},
-	{"KeyA",},
-	{"KeyW",},
-	{"KeyS",},
-	{"KeyQ",},
-	{"KeyE",},
-};
-
 // we want system independent hashing. std::hash doesn't give this.
 inline uint32_t hash_str_uint32(const std::string &str) {
 	uint32_t hash = 0x811c9dc5;
@@ -54,29 +35,30 @@ public:
 		}" : "=r"(ret));
 		return ret;
 	}
-	void step()
+	client::HTMLCanvasElement* getCanvas()
 	{
-		game->action = getAction();
-		game->step();
-		game->observe();
-		totalReward+= state.reward;
-		displayState();
-		kb->clear();
+		return canvas;
 	}
-	void displayState()
+	void step(int action)
 	{
-		std::string hud = std::string("Reward: ") + std::to_string(state.reward) + "\n" +
-			"Total reward: " + std::to_string(totalReward) + "\n" +
-			"Level seed: " + std::to_string(state.level_seed) + "\n" +
-			"Previous level seed: " + std::to_string(state.prev_level_seed) + "\n" +
-			"Previous level complete: " + std::to_string(state.prev_level_complete) + "\n" +
-			"Done: " + std::to_string(state.done) + "\n";
-		stateDiv->set_innerText(hud.c_str());
+		game->action = action;
+		game->step();
+	}
+	void render()
+	{
+		game->render_to_canvas(canvas, canvas->get_width(), canvas->get_height(), false);
+	}
+	client::GameState* observe()
+	{
+		game->observe();
+		return getState();
+	}
+	client::GameState* getState()
+	{
+		return state;
 	}
 	void destroy()
 	{
-		delete kb;
-		kb = nullptr;
 		delete game;
 		game = nullptr;
 	}
@@ -97,27 +79,16 @@ public:
 private:
 	CheerpGame(VecOptions& opts)
 	{
-		// Setup the dom
-		auto* div = client::document.getElementById("app");
-		kb = new Keyboard(client::document.get_body());
+		// Setup the canvas
 		canvas = static_cast<client::HTMLCanvasElement*>(client::document.createElement("canvas"));
 		canvas->set_width(RENDER_RES);
 		canvas->set_height(RENDER_RES);
-		div->appendChild(canvas);
-		stateDiv = client::document.createElement("div");
-		div->appendChild(stateDiv);
+
+		// Create shared state
+		state = new client::GameState();
 
 		// Setup the game
 		initGame(opts);
-
-		// First step
-		step();
-
-		// Following steps
-		client::setInterval(cheerp::Callback([this]()
-		{
-			step();
-		}), 100);
 	}
 
 	void initGame(VecOptions& opts)
@@ -155,8 +126,7 @@ private:
 		game_level_seed_gen.seed(rand_seed);
 
 		game = globalGameRegistry->at(env_name)();
-		game->set_canvas(canvas);
-		game->state = &state;
+		game->state = state;
 		fassert(game->game_name == env_name);
 		game->level_seed_rand_gen.seed(game_level_seed_gen.randint());
 		game->level_seed_high = level_seed_high;
@@ -179,37 +149,8 @@ private:
 		game->initial_reset_complete = true;
 	}
 
-	int getAction()
-	{
-		int longest = -1;
-		int action = -1;
-		int i = 0;
-		for (auto& combo: combos)
-		{
-			bool hit = true;
-			for (auto* k: combo)
-			{
-				if (!kb->isPressed(k))
-				{
-					hit = false;
-					break;
-				}
-			}
-			if (hit && longest < (int)combo.size())
-			{
-				longest = combo.size();
-				action = i;
-			}
-			i++;
-		}
-		return action;
-	}
-
 	Game* game;
-	Keyboard* kb;
-	GameState state;
-	double totalReward{0};
-	client::HTMLElement* stateDiv;
+	client::GameState* state;
 	client::HTMLCanvasElement* canvas;
 };
 
