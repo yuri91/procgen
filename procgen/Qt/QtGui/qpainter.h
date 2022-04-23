@@ -133,7 +133,7 @@ public:
 		switch (mode) {
 			case CompositionMode::CompositionMode_Source:
 			{
-				ctx->set_globalCompositeOperation("copy");
+				//ctx->set_globalCompositeOperation("copy");
 				break;
 			}
 		}
