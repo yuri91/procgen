@@ -79,3 +79,21 @@ target_include_directories(env PUBLIC ${LIBENV_DIR})
 target_include_directories(env PUBLIC "Qt")
 
 #target_link_libraries(env Qt5::Gui)
+
+# Cheerp
+
+install(FILES
+  ${CMAKE_SOURCE_DIR}/index.html
+  ${CMAKE_SOURCE_DIR}/main.js
+  DESTINATION ${CMAKE_BINARY_DIR}/dist/
+)
+
+install(DIRECTORY
+  ${CMAKE_SOURCE_DIR}/data/assets/
+  DESTINATION ${CMAKE_BINARY_DIR}/dist/assets/
+)
+
+INSTALL(TARGETS env RUNTIME
+  DESTINATION ${CMAKE_BINARY_DIR}/dist/
+	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_WRITE GROUP_READ WORLD_WRITE WORLD_READ
+)

@@ -25,7 +25,7 @@ public:
 	{
 		client::Object* ret;
 		__asm__("{\
-			resource_root:'data/assets/',\
+			resource_root:'assets/',\
 			env_name:'miner',\
 			rand_seed:0,\
 			use_generated_assets:false,\
