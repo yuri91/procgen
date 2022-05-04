@@ -70,10 +70,15 @@ function printState(state, stats, screens)
 function parseOpts()
 {
 	try {
-		const hash = window.location.hash.slice(1);
-		return JSON.parse(decodeURI(hash));
+		const search = new URLSearchParams(window.location.search);
+		const ret = {};
+		for (const [k, v] of search.entries())
+		{
+			ret[k] = JSON.parse(v);
+		}
+		return ret;
 	} catch (e) {
-		console.error("url hash is not valid JSON");
+		console.error("Query string is invalid");
 		return {};
 	}
 }
