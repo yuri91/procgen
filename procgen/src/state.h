@@ -16,6 +16,8 @@ public:
 	void set_prev_level_complete(bool);
 	bool get_done();
 	void set_done(bool);
+	client::HTMLCanvasElement* get_rgb();
+	void set_rgb(client::HTMLCanvasElement*);
 };
 
 }

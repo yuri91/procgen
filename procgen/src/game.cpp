@@ -22,6 +22,25 @@ void bgr32_to_rgb888(void *dst_rgb888, void *src_bgr32, int w, int h) {
     }
 }
 
+void canvas_to_rgb888(client::Uint8Array *dst_rgb888, client::HTMLCanvasElement* c, int w, int h) {
+    uint8_t *dst = &(*dst_rgb888)[0];
+    auto* ctx = static_cast<client::CanvasRenderingContext2D*>(c->getContext("2d"));
+    auto* data = ctx->getImageData(0, 0, w, h);
+    double* src = &(*data->get_data())[0];
+
+    for (int y = 0; y < h; y++) {
+        double *s = src + y * w * 4;
+        uint8_t *d = dst + y * w * 3;
+        for (int x = 0; x < w; x++) {
+            d[0] = s[0];
+            d[1] = s[1];
+            d[2] = s[2];
+            s += 4;
+            d += 3;
+        }
+    }
+}
+
 Game::Game(std::string name) : game_name(name) {
     timeout = 1000;
     episodes_remaining = 0;
@@ -75,9 +94,6 @@ void Game::parse_options(std::string name, VecOptions opts) {
 }
 
 void Game::render_to_canvas(client::HTMLCanvasElement* canvas, int w, int h, bool antialias) {
-    // Qt focuses on RGB32 performance:
-    // https://doc.qt.io/qt-5/qpainter.html#performance
-    // so render to an RGB32 buffer and then convert it rather than render to RGB888 directly
     QPainter p(canvas);
 
     if (antialias) {
@@ -155,6 +171,12 @@ void Game::step() {
 
 void Game::observe() {
     //bgr32_to_rgb888(obs_bufs[0], render_buf, RES_W, RES_H);
+    QImage img(RES_W, RES_H, QImage::Format_ARGB32);
+    render_to_canvas(img.getCanvas(), RES_W, RES_H, false);
+    //auto* rgb = new client::Uint8Array(RES_W*RES_H*3);
+    //canvas_to_rgb888(rgb, img.getCanvas(), RES_W, RES_H);
+    auto* rgb = img.getCanvas();
+    state->set_rgb(rgb);
     state->set_reward(step_data.reward);
     state->set_prev_level_seed(prev_level_seed);
     state->set_prev_level_complete(step_data.level_complete);

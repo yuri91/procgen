@@ -54,23 +54,50 @@ function getAction()
 	return action;
 }
 
+function printState(state, stats, screens)
+{
+	const rgb = state.rgb;
+	screens.appendChild(rgb);
+	delete state.rgb;
+	let statsText = "";
+	for (const [k, v] of Object.entries(state))
+	{
+		statsText += String(k) + ": " + String(v) + "\n";
+	}
+	stats.innerText = statsText;
+}
+
+function parseOpts()
+{
+	try {
+		const hash = window.location.hash.slice(1);
+		return JSON.parse(decodeURI(hash));
+	} catch (e) {
+		console.error("url hash is not valid JSON");
+		return {};
+	}
+}
+
 async function main()
 {
 	const div = document.getElementById("app");
-	const opts = CheerpGame.defaultOpts();
 	const c = await CheerpGame.init({
-		env_name: "miner",
-		rand_seed: 0,
-		distribution_mode: 1,
-		...opts
+		...CheerpGame.defaultOpts(),
+		...parseOpts(),
 	});
 	div.appendChild(c.getCanvas());
 	const stats = document.createElement("div");
 	div.appendChild(stats);
+	const screens = document.createElement("div");
+	div.appendChild(screens);
+	screens.style.overflowX = "auto";
+	screens.style.whiteSpace = "nowrap";
 
 	listenForKeys();
 
 	c.render();
+	const state = c.observe();
+	printState(state, stats, screens);
 	setInterval(() => {
 		if (keyState.size == 0)
 			return;
@@ -78,7 +105,7 @@ async function main()
 		c.step(action);
 		c.render();
 		const state = c.observe();
-		stats.innerText = JSON.stringify(state, null, 2);
+		printState(state, stats, screens);
 		resetKeys();
 	}, 100);
 }

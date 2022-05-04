@@ -3,7 +3,6 @@
 #include "game.h"
 #include "resources.h"
 #include "state.h"
-#include "keyboard.h"
 #include "vecoptions.h"
 
 // we want system independent hashing. std::hash doesn't give this.
