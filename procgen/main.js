@@ -26,6 +26,7 @@ function listenForKeys()
 {
 	document.body.addEventListener("keydown", (e) => {
 		keyState.add(e.code);
+		e.preventDefault();
 	});
 }
 function getAction()
