@@ -20,4 +20,23 @@ public:
 	void set_rgb(client::HTMLCanvasElement*);
 };
 
+class MinerState: public GameState {
+public:
+	void set_grid(client::Int32Array*);
+	void set_grid_width(int);
+	void set_grid_height(int);
+	void set_agent_x(int);
+	void set_agent_y(int);
+	void set_exit_x(int);
+	void set_exit_y(int);
+};
+
+class MazeState: public GameState {
+public:
+	void set_grid(client::Int32Array*);
+	void set_grid_width(int);
+	void set_grid_height(int);
+	void set_agent_x(int);
+	void set_agent_y(int);
+};
 }

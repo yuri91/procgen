@@ -169,20 +169,22 @@ class MazeGame : public BasicAbstractGame {
 
         auto latent_state = get_latent_state();
 
-        int32_t *grid_size = (int32_t *)(info_bufs[info_name_to_offset.at("grid_size")]);
+        auto* js_state = static_cast<client::MazeState*>(this->state);
 
-        grid_size[0] = latent_state.grid_width;
-        grid_size[1] = latent_state.grid_height;
+        js_state->set_grid_width(latent_state.grid_width);
+        js_state->set_grid_height(latent_state.grid_height);
 
-        int32_t *grid = (int32_t *)(info_bufs[info_name_to_offset.at("grid")]);
+        int32_t grid_size = latent_state.grid_width*latent_state.grid_height;
+        int32_t* grid = new int32_t[grid_size];
         auto grid_start = latent_state.grid.begin();
         auto grid_stop = latent_state.grid.begin();
-        std::advance(grid_stop, latent_state.grid_width * latent_state.grid_height);
+        std::advance(grid_stop, grid_size);
         std::copy(grid_start, grid_stop, grid);
+        js_state->set_grid(cheerp::MakeTypedArray(grid, grid_size));
 
-        int32_t *agent_pos = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
-        agent_pos[0] = latent_state.agent_x;
-        agent_pos[1] = latent_state.agent_y;
+        js_state->set_agent_x(latent_state.agent_x);
+        js_state->set_agent_y(latent_state.agent_y);
+
     }
 };
 
