@@ -55,10 +55,13 @@ function getAction()
 	return action;
 }
 
-function printState(state, stats, screens)
+function printState(state, stats, screens, realtime)
 {
-	const rgb = state.rgb;
-	screens.appendChild(rgb);
+	if (!realtime)
+	{
+		const rgb = state.rgb;
+		screens.appendChild(rgb);
+	}
 	delete state.rgb;
 	let statsText = "";
 	for (const [k, v] of Object.entries(state))
@@ -87,9 +90,16 @@ function parseOpts()
 async function main()
 {
 	const div = document.getElementById("app");
+	let opts = parseOpts();
+	let realtime = false;
+	if (opts.realtime !== undefined)
+	{
+		realtime = opts.realtime;
+		delete opts.realtime;
+	}
 	const c = await CheerpGame.init({
 		...CheerpGame.defaultOpts(),
-		...parseOpts(),
+		...opts,
 	});
 	div.appendChild(c.getCanvas());
 	const stats = document.createElement("div");
@@ -103,15 +113,15 @@ async function main()
 
 	c.render();
 	const state = c.observe();
-	printState(state, stats, screens);
+	printState(state, stats, screens, realtime);
 	setInterval(() => {
-		if (keyState.size == 0)
+		if (!realtime && keyState.size == 0)
 			return;
 		const action = getAction();
 		c.step(action);
 		c.render();
 		const state = c.observe();
-		printState(state, stats, screens);
+		printState(state, stats, screens, realtime);
 		resetKeys();
-	}, 100);
+	}, 1000/15);
 }
